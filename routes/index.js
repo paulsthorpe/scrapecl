@@ -2,57 +2,72 @@ var express = require('express');
 var router = express.Router();
 var request = require('request');
 var cheerio = require('cheerio');
+var fs = require('fs');
 
 router.get("/", function(req, res){
-   var url = 'https://www.craigslist.org/about/sites#US';
-
- var locals = request(url, function(err, response, html){
-    var $ = cheerio.load(html);
-    var locations = getCountries($);
-     for(var i = 0; i < locations.length; i++){
-        locations[i].states.push(getStates($, i, locations));
+    // var url = 'https://www.craigslist.org/about/sites';
+    var url = 'https://raleigh.craigslist.org';
+    request(url, function(err, response, html){
+        var $ = cheerio.load(html);
+        // var locations = getCountries($);
+        var categories = getCategories($);
+        fs.writeFile(__dirname + "/tmp/test", JSON.stringify(categories), function(err) {
+    if(err) {
+        return console.log(err);
     }
-    console.log(locations[0].states[0].cities[0].name)
-
-  });
-
-    // res.render('index', {locals: locals[0].country});
+    });
+        res.render('index', {
+            // locals: locations, 
+            categories: categories
+        });
+    }); 
+ 
 });
+
+function getCategories($){
+    var categories = [];
+    $('.ban').each(function(){
+        categories.push({
+            name: $(this).find('span').text()
+        });
+    });
+    return categories;
+}
 
 function getCountries($){
       var locations = [];
-      var cntrys = $('h1').each(function(){
+      var cntrys = $('h1').each(function(i){
           locations.push({
-              "country": $(this).text(),
-              "states": []
+              country: $(this).text(),
+              states: getStates($, this)
           });
       });
       return locations;
 }
 
-function getStates($, i, locations){
-    states = [];
-    $('.colmask').eq(i).find('h4').map(function(i, el){
-        var state = {
-            "name": $(this).text(),
-            "cities": getCities($, this)
-        };
+function getStates($, prevElem){
+    var states = [];
+        $(prevElem).next('.colmask').find('h4').map(function(i, el){
+            var state = {
+            name: $(this).text(),
+            cities: getCities($, this)
+            };
         states.push(state);
-
-    });
+        });
     return states;
 }
 
-function getCities($, elem){
+function getCities($, prevElem){
     var cities = [];
-    $(elem).next('ul').find('li').map(function(i, el){
+    $(prevElem).next('ul').find('li').map(function(i, el){
         cities.push({
-            'name': $(this).find('a').text(),
-            'link': $(this).find('a').attr('href')
+            name: $(this).find('a').text(),
+            link: $(this).find('a').attr('href')
         });
     });
-    console.log(cities);
     return cities;
 }
+
+
 
 module.exports = router;

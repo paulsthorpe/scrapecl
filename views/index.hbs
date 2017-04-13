@@ -1,5 +1,31 @@
 <div class="container">
-    <div class="col-sm-3">
-        {{locals}}
-    </div>
+    {{#if locals}}
+        {{#each locals}}
+        <div class="row">
+            <h1>{{country}}</h1>
+            <ul>
+            {{#each states}}
+                <li><h3>{{name}}</h3></li>
+                <ul>
+                    {{#each cities}}
+                        <li><a href="{{link}}">{{name}}</a></li>
+                    {{/each}}
+                </ul>
+            {{/each}}
+            </ul>
+            
+        </div>
+        {{/each}}
+        {{/if}}
+
+        {{#if categories}}
+        <ul>
+            {{#each categories}}
+            {{#if name}}
+               <li>{{name}}</li> 
+            {{/if}}
+            {{/each}}
+        </ul>
+            
+        {{/if}}
 </div>
