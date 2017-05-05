@@ -5,19 +5,20 @@ var cheerio = require('cheerio');
 var fs = require('fs');
 
 router.get("/", function(req, res){
-    // var url = 'https://www.craigslist.org/about/sites';
+    var url = 'https://www.craigslist.org/about/sites';
     var url = 'https://raleigh.craigslist.org';
     request(url, function(err, response, html){
         var $ = cheerio.load(html);
         // var locations = getCountries($);
         var categories = getCategories($);
+        categories = 
         fs.writeFile(__dirname + "/tmp/test", JSON.stringify(categories), function(err) {
-    if(err) {
-        return console.log(err);
-    }
-    });
+            if(err) {
+                return console.log(err);
+            }
+        });
         res.render('index', {
-            // locals: locations, 
+            // locals: locations
             categories: categories
         });
     }); 
@@ -28,10 +29,39 @@ function getCategories($){
     var categories = [];
     $('.ban').each(function(){
         categories.push({
-            name: $(this).find('span').text()
+            name: $(this).find('span').text(),
+            link: $(this).find('a').attr('href'),
+            sub: getSubCategories($, this)
         });
     });
     return categories;
+}
+
+function getSubCategories($, prevElem){
+    var sub = [];
+    $(prevElem).next('.cats').find('ul').each(function(index, el){
+        var data = getSubData($, this);
+        sub.push(data);
+    });
+    var listCount = sub.length;
+    subCategories = [];
+    for(var i = 0; i < listCount; i++){
+        // console.log(sub[i]);
+        subCategories = subCategories.concat(sub[i]);
+    }
+    console.log(subCategories);
+    return subCategories;
+}
+
+function getSubData($, el){
+    var subCats = [];
+    $(el).find('li').each(function(i, elem){
+        subCats.push({
+            name: $(elem).find('span').first().text(),
+            link: $(elem).find('a').first().attr('href')
+        });
+    });
+    return subCats;
 }
 
 function getCountries($){

@@ -13,19 +13,27 @@
                 </ul>
             {{/each}}
             </ul>
-            
         </div>
         {{/each}}
         {{/if}}
 
         {{#if categories}}
-        <ul>
+        <div class="col-sm-12">
             {{#each categories}}
-            {{#if name}}
-               <li>{{name}}</li> 
-            {{/if}}
+            <div class="col-sm-12">
+                {{#if name}}
+                    <h2>{{name}} ( {{link}} )</h2>
+                    <div class="row">
+                        {{#each sub}}
+                            <div class="col-sm-3">
+                                <p>{{name}} ( {{link}} )</p>
+                            </div>
+                        {{/each}}
+                    </div>
+                {{/if}}
+            </div>
             {{/each}}
-        </ul>
+        </div>
             
         {{/if}}
 </div>
