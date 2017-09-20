@@ -19,14 +19,34 @@ router.get("/categories", function(req, res){
     request(url, function(err, response, html){
         var $ = cheerio.load(html);
         var categories = getCategories($);
-        categories = 
         res.json(categories);
     }); 
 });
 
-router.get('/locations/:id', function(req, res){
-    res.send();
+router.get('/search', function(req, res){
+    var url = 'https://raleigh.craigslist.org/d/for-sale/search/sss';
+    request(url, function(err, response, html){
+        var $ = cheerio.load(html);
+        var searchResults = getResults($);
+        res.send(searchResults);
+    });
 })
+
+function getResults($){
+    var results = [];
+    $('.result-row').each(function(){
+        results.push({
+            link: $(this).find('a').first().attr('href'),
+            price: $(this).find('.result-price').html(),
+            title: $(this).find('.result-title').html(),
+            location: $(this).find('.result-hood').html(),
+            img: $(this).closest('img').attr('src')
+            // .find('result-image').attr('src')
+            // .find('img').attr('src')
+        })
+    });
+    return results;
+}
 
 function getCategories($){
     var categories = [];
