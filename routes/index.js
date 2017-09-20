@@ -4,26 +4,29 @@ var request = require('request');
 var cheerio = require('cheerio');
 var fs = require('fs');
 
-router.get("/", function(req, res){
+router.get("/locations", function(req, res){
     var url = 'https://www.craigslist.org/about/sites';
-    var url = 'https://raleigh.craigslist.org';
     request(url, function(err, response, html){
         var $ = cheerio.load(html);
-        // var locations = getCountries($);
-        var categories = getCategories($);
-        categories = 
-        fs.writeFile(__dirname + "/tmp/test", JSON.stringify(categories), function(err) {
-            if(err) {
-                return console.log(err);
-            }
-        });
-        res.render('index', {
-            // locals: locations
-            categories: categories
-        });
+        var locations = getCountries($);
+        res.json(locations);
     }); 
  
 });
+
+router.get("/categories", function(req, res){
+    var url = 'https://raleigh.craigslist.org';
+    request(url, function(err, response, html){
+        var $ = cheerio.load(html);
+        var categories = getCategories($);
+        categories = 
+        res.json(categories);
+    }); 
+});
+
+router.get('/locations/:id', function(req, res){
+    res.send();
+})
 
 function getCategories($){
     var categories = [];
@@ -46,10 +49,8 @@ function getSubCategories($, prevElem){
     var listCount = sub.length;
     subCategories = [];
     for(var i = 0; i < listCount; i++){
-        // console.log(sub[i]);
         subCategories = subCategories.concat(sub[i]);
     }
-    console.log(subCategories);
     return subCategories;
 }
 
